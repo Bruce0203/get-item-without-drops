@@ -1,5 +1,4 @@
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
-typealias Shadowjar = com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+typealias ShadowJar = com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val kotlin_version = "1.7.0"
 buildscript {
@@ -10,12 +9,11 @@ buildscript {
         classpath("gradle.plugin.com.github.johnrengelman:shadow:7.1.2")
     }
 }
-plugins {
 
+plugins {
     kotlin("jvm") version "1.7.0"
-    id("org.jetbrains.dokka") version "1.4.32"
-    id("maven-publish")
 }
+
 allprojects {
     apply(plugin = "kotlin")
     apply(plugin = "com.github.johnrengelman.shadow")
@@ -36,46 +34,33 @@ allprojects {
     }
 
     dependencies {
-//    api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-        compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
-
+        api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+        compileOnly("org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT")
     }
+    tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+        dependsOn(tasks.processResources)
+        archiveFileName.set("${rootProject.name}.jar")
 
-    lateinit var sourcesArtifact: PublishArtifact
-
-
-    tasks {
-        artifacts {
-            sourcesArtifact = archives(jar)
+        doLast {
+            copy {
+                val sep = File.separator
+                from("${buildDir.absolutePath}${sep}libs$sep${project.name}.jar")
+                into("${project.buildDir.absolutePath}${sep}dist")
+            }
         }
     }
 
-    apply(plugin = "maven-publish")
-
-    publishing {
-        val repo = System.getenv("GITHUB_REPOSITORY")
-        if (repo === null) return@publishing
-        repositories {
-            maven {
-                url = uri("https://s01.oss.sonatype.org/content/repositories/releases/")
-                credentials {
-
-                    username = System.getenv("SONATYPE_USERNAME") as? String
-                    password = System.getenv("SONATYPE_PASSWORD") as? String
+    tasks {
+        processResources {
+            repeat(2) {
+                filesMatching("**/*.yml") {
+                    expand(HashMap(rootProject.properties)
+                        .apply { putAll(project.properties) }
+                        .apply { put("version", rootProject.version)})
                 }
             }
         }
-        publications {
-            register<MavenPublication>(project.name) {
-                val githubUserName = repo.substring(0, repo.indexOf("/"))
-                groupId = "io.github.${githubUserName.toLowerCaseAsciiOnly()}"
-                artifactId = project.name.toLowerCase()
-                version = System.getenv("GITHUB_BUILD_NUMBER")?: project.version.toString()
-                artifact(sourcesArtifact)
-            }
-        }
-
     }
 
-
 }
+

@@ -1,0 +1,3 @@
+name: get-item-without-drops
+main: io.github.bruce0203.getitemwithoutdrop.Plugin
+version: $version
