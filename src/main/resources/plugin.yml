@@ -1,3 +1,5 @@
 name: get-item-without-drops
 main: io.github.bruce0203.getitemwithoutdrop.Plugin
 version: $version
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib:1.6.10
