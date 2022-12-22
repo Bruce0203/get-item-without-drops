@@ -21,7 +21,12 @@ class Plugin : JavaPlugin(), Listener {
             } catch(_: Exception) {
                 throw AssertionError("$it is not a Material type")
             }
-        }.toMutableSet()
+        }.run {
+            val arrayList = ArrayList(this)
+            config.getStringList("filter")
+                .map { filter -> Material.values().filter { it.name.contains(filter) }.toList() }
+            arrayList
+        }
     }
 
     private fun loadConfig() {
