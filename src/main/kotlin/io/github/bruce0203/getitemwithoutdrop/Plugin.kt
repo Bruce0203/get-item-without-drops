@@ -25,6 +25,7 @@ class Plugin : JavaPlugin(), Listener {
             val arrayList = ArrayList(this)
             config.getStringList("filter")
                 .map { filter -> Material.values().filter { it.name.contains(filter) }.toList() }
+                .forEach { arrayList.addAll(it) }
             arrayList
         }
     }
