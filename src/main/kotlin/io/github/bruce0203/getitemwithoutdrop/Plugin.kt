@@ -48,6 +48,16 @@ class Plugin : JavaPlugin(), Listener {
 
     @EventHandler
     fun onDropBlockItem(event: BlockDropItemEvent) {
+        if (config.isBoolean("force-drop")) {
+            val items = event.items
+            items.forEach { item ->
+                val block = event.block
+                val location = block.location
+                val world = block.world
+                world.dropItemNaturally(location, item.itemStack);
+            }
+            return
+        }
         val blockState = event.blockState
         if (!blockState.hasMetadata(BLOCK_NO_DROP)) return
         blockState.removeMetadata(BLOCK_NO_DROP, this)
