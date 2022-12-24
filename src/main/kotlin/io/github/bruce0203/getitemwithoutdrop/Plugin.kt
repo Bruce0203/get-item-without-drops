@@ -49,6 +49,7 @@ class Plugin : JavaPlugin(), Listener {
     @EventHandler
     fun onDropBlockItem(event: BlockDropItemEvent) {
         if (config.isBoolean("force-drop")) {
+            event.isCancelled = true
             val items = event.items
             items.forEach { item ->
                 val block = event.block
